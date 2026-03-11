@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Mode - Smart Weather</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">
+            <i class="fa-solid fa-cloud-sun"></i> Smart Weather
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Dashboard</a>
+            <a href="map.html">Explorer Map</a>
+            <a href="farmer.html" class="active">Farmer Mode</a>
+            <a href="aqi.html">Health & AQI</a>
+            <a href="trends.html">Trends</a>
+            <a href="alerts.html">Alerts</a>
+            <a href="#" id="logout-btn" style="color:var(--alert-danger)"><i class="fa-solid fa-right-from-bracket"></i>
+                Logout</a>
+        </div>
+        <button class="theme-toggle" id="theme-toggle" title="Toggle Dark Mode">
+            <i class="fa-solid fa-moon"></i>
+        </button>
+    </nav>
+
+    <div class="container">
+        <header style="margin-bottom: 2rem;">
+            <h1><i class="fa-solid fa-seedling" style="color:#10b981;"></i> Farmer Assistant</h1>
+            <p style="color: var(--text-secondary);">Localized weather insights tailored for agriculture.</p>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="card glass">
+                <h3>7-Day Rainfall Forecast</h3>
+                <div style="margin-top:1rem;">
+                    <p style="color:var(--text-secondary)"><i>Generated using OpenWeather predictive data.</i></p>
+                    <ul class="forecast-list" style="margin-top:1rem;">
+                        <li class="forecast-item"><span>Today</span> <span>0% chance</span> <span><i
+                                    class="fa-solid fa-cloud-sun"></i></span></li>
+                        <li class="forecast-item"><span>Tomorrow</span> <span>15% chance</span> <span><i
+                                    class="fa-solid fa-cloud"></i></span></li>
+                        <li class="forecast-item" style="border-left: 3px solid var(--alert-info)"><span>Day 3</span>
+                            <span>85% chance - Heavy Rain</span> <span><i
+                                    class="fa-solid fa-cloud-showers-heavy"></i></span>
+                        </li>
+                        <li class="forecast-item"><span>Day 4</span> <span>20% chance</span> <span><i
+                                    class="fa-solid fa-cloud-sun"></i></span></li>
+                        <li class="forecast-item"><span>Day 5</span> <span>0% chance</span> <span><i
+                                    class="fa-solid fa-sun"></i></span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card glass">
+                <h3><i class="fa-solid fa-tractor" style="color:var(--alert-warning)"></i> Smart Farming Advice</h3>
+                <div style="margin-top:1rem;">
+                    <div class="suggestion-box success">
+                        <i class="fa-solid fa-seedling"></i>
+                        <div>
+                            <strong>Sowing Advisory</strong> <br>
+                            Soil moisture is adequate for sowing early rabi crops today.
+                        </div>
+                    </div>
+
+                    <div class="suggestion-box danger">
+                        <i class="fa-solid fa-spray-can-sparkles"></i>
+                        <div>
+                            <strong>Pesticide Alert</strong> <br>
+                            High chance of rain on Day 3. <b>Avoid pesticide/fertilizer spraying</b> for the next 48
+                            hours to prevent wash-off.
+                        </div>
+                    </div>
+
+                    <div class="suggestion-box warning">
+                        <i class="fa-solid fa-wheat-awn"></i>
+                        <div>
+                            <strong>Harvesting Advisory</strong> <br>
+                            If harvesting, complete work by tomorrow evening before the expected showers.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Smart Weather Advisory System | Built by Rudraksh Thakare</p>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+</body>
+
+</html>

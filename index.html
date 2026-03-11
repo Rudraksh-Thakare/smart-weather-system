@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Weather - Dashboard</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">
+            <i class="fa-solid fa-cloud-sun"></i> Smart Weather
+        </a>
+        <div class="nav-links">
+            <a href="index.html" class="active">Dashboard</a>
+            <a href="map.html">Explorer Map</a>
+            <a href="farmer.html">Farmer Mode</a>
+            <a href="aqi.html">Health & AQI</a>
+            <a href="trends.html">Trends</a>
+            <a href="alerts.html">Alerts</a>
+            <a href="#" id="logout-btn" style="color:var(--alert-danger)"><i class="fa-solid fa-right-from-bracket"></i>
+                Logout</a>
+        </div>
+        <button class="theme-toggle" id="theme-toggle" title="Toggle Dark Mode">
+            <i class="fa-solid fa-moon"></i>
+        </button>
+    </nav>
+
+    <div class="container">
+        <header style="margin-bottom: 2rem;">
+            <h1>Weather Overview</h1>
+            <p id="location-display" style="color: var(--text-secondary);"><i class="fa-solid fa-location-dot"></i>
+                Locating your area...</p>
+        </header>
+
+        <div id="main-loader" class="loader"></div>
+        <div id="error-message" style="display:none; color: var(--alert-danger); text-align: center;"></div>
+
+        <div id="dashboard-content" class="dashboard-grid" style="display:none;">
+            <!-- Current Weather Card -->
+            <div class="card glass">
+                <h3>Current Weather</h3>
+                <div class="weather-main" id="current-weather">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+
+            <!-- Suggestions System Card -->
+            <div class="card glass">
+                <h3><i class="fa-solid fa-lightbulb" style="color:var(--alert-warning)"></i> Intelligent Advisories</h3>
+                <div id="suggestions-container">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+
+            <!-- 5-Day Forecast -->
+            <div class="card glass" style="grid-column: 1 / -1;">
+                <h3>5-Day Forecast</h3>
+                <div class="forecast-list" id="forecast-container"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Smart Weather Advisory System | Built by Rudraksh Thakare</p>
+    </footer>
+
+    <!-- Configuration and Utility definitions -->
+    <script src="assets/js/main.js"></script>
+</body>
+
+</html>

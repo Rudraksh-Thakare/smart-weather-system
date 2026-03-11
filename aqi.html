@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AQI & Health Advisory</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">
+            <i class="fa-solid fa-cloud-sun"></i> Smart Weather
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Dashboard</a>
+            <a href="map.html">Explorer Map</a>
+            <a href="farmer.html">Farmer Mode</a>
+            <a href="aqi.html" class="active">Health & AQI</a>
+            <a href="trends.html">Trends</a>
+            <a href="alerts.html">Alerts</a>
+            <a href="#" id="logout-btn" style="color:var(--alert-danger)"><i class="fa-solid fa-right-from-bracket"></i>
+                Logout</a>
+        </div>
+        <button class="theme-toggle" id="theme-toggle" title="Toggle Dark Mode">
+            <i class="fa-solid fa-moon"></i>
+        </button>
+    </nav>
+
+    <div class="container">
+        <header style="margin-bottom: 2rem;">
+            <h1>Air Quality & Health Index (AQHI) Monitoring</h1>
+            <p style="color: var(--text-secondary);">Real-time atmospheric composition tracking powered by WAQI
+                telemetry.</p>
+        </header>
+
+        <div id="main-loader" class="loader"></div>
+        <div id="error-message" style="display:none; color: var(--alert-danger); text-align: center;"></div>
+
+        <div id="aqi-content" style="display:none; max-width: 600px; margin: 0 auto;">
+            <!-- Injected by main.js in initAQI() -->
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Smart Weather Advisory System | Built by Rudraksh Thakare</p>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+</body>
+
+</html>

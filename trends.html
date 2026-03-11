@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Trends</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+    <nav>
+        <a href="index.html" class="logo">
+            <i class="fa-solid fa-cloud-sun"></i> Smart Weather
+        </a>
+        <div class="nav-links">
+            <a href="index.html">Dashboard</a>
+            <a href="map.html">Explorer Map</a>
+            <a href="farmer.html">Farmer Mode</a>
+            <a href="aqi.html">Health & AQI</a>
+            <a href="trends.html" class="active">Trends</a>
+            <a href="alerts.html">Alerts</a>
+            <a href="#" id="logout-btn" style="color:var(--alert-danger)"><i class="fa-solid fa-right-from-bracket"></i>
+                Logout</a>
+        </div>
+        <button class="theme-toggle" id="theme-toggle" title="Toggle Dark Mode">
+            <i class="fa-solid fa-moon"></i>
+        </button>
+    </nav>
+
+    <div class="container">
+        <header
+            style="margin-bottom: 2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+            <div>
+                <h1>Weather History & Trends</h1>
+                <p style="color: var(--text-secondary);">Visualize past weather data for any location</p>
+            </div>
+            <div>
+                <input type="text" id="city-input" placeholder="Enter a City (e.g., Pune)" class="glass"
+                    style="padding:0.5rem; border:1px solid var(--card-border); outline:none; border-radius:4px; background:var(--bg-secondary); color:var(--text-primary);">
+                <button id="load-trends-btn" class="btn">Load Data</button>
+            </div>
+        </header>
+
+        <div id="main-loader" class="loader" style="display:none;"></div>
+        <div id="error-message" style="display:none; color: var(--alert-danger); text-align: center;"></div>
+
+        <div class="dashboard-grid" id="charts-container" style="display:none;">
+            <div class="card glass"
+                style="grid-column: 1 / -1; height:400px; display:flex; align-items:center; justify-content:center;">
+                <canvas id="tempChart"></canvas>
+            </div>
+
+            <div class="card glass" style="height:350px; display:flex; align-items:center; justify-content:center;">
+                <canvas id="humidityChart"></canvas>
+            </div>
+
+            <div class="card glass" style="height:350px; display:flex; align-items:center; justify-content:center;">
+                <canvas id="rainChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Smart Weather Advisory System | Built by Rudraksh Thakare</p>
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/charts.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,7 @@
+# Ignore sensitive files from GitHub
+api/env.php
+start_automation.ps1
+
+# Ignore OS files
+.DS_Store
+Thumbs.db
