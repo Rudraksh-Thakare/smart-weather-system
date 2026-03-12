@@ -72,9 +72,9 @@ try {
             exit();
         }
 
-        // Find user
-        $stmt = $pdo->prepare("SELECT id, username, password_hash FROM Users WHERE username = :username");
-        $stmt->bindParam(':username', $username);
+        // Find user (Case-insensitive support for both Username and Email)
+        $stmt = $pdo->prepare("SELECT id, username, password_hash FROM Users WHERE LOWER(username) = LOWER(:identifier) OR LOWER(email) = LOWER(:identifier)");
+        $stmt->bindParam(':identifier', $username);
         $stmt->execute();
         $user = $stmt->fetch();
 

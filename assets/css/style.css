@@ -116,6 +116,12 @@ nav {
     background: rgba(255,255,255,0.1);
 }
 
+/* Form Dropdowns in Dark Mode */
+[data-theme="dark"] select option {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
 /* Main Container */
 .container {
     max-width: 1200px;

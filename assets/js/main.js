@@ -67,6 +67,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         initDashboard();
     }
 
+    // Check if on Farmer page
+    if (document.getElementById('farmer-content')) {
+        initFarmer();
+    }
+
     // Check if on AQI page
     if (document.getElementById('aqi-content')) {
         initAQI();
@@ -277,6 +282,279 @@ function updateDashboardUI(current, forecast) {
 }
 
 // ============================================
+// FARMER MODE
+// ============================================
+
+function initFarmer() {
+    // Setup Crop Selector event listener if on farmer page
+    const cropSelector = document.getElementById('crop-selector');
+    if (cropSelector) {
+        // Load saved preference
+        const savedCrop = localStorage.getItem('farmer_active_crop');
+        if (savedCrop) cropSelector.value = savedCrop;
+        
+        // Listen for changes
+        cropSelector.addEventListener('change', (e) => {
+            localStorage.setItem('farmer_active_crop', e.target.value);
+            // Re-fetch and re-render data immediately
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (pos) => fetchFarmerData(pos.coords.latitude, pos.coords.longitude),
+                    () => fetchFarmerData(18.5204, 73.8567)
+                );
+            } else {
+                fetchFarmerData(18.5204, 73.8567);
+            }
+        });
+    }
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                fetchFarmerData(position.coords.latitude, position.coords.longitude);
+            },
+            (error) => {
+                showError("Geolocation denied or unavailable. Showing default location (Pune).");
+                fetchFarmerData(18.5204, 73.8567);
+            }
+        );
+    } else {
+        showError("Geolocation is not supported by this browser.");
+        fetchFarmerData(18.5204, 73.8567);
+    }
+}
+
+async function fetchFarmerData(lat, lon) {
+    showLoader(true);
+    try {
+        const forecastUrl = `${API_BASE_URL}proxy.php?service=forecast&lat=${lat}&lon=${lon}`;
+        const forecastResponse = await fetch(forecastUrl);
+        const forecastData = await forecastResponse.json();
+
+        if (forecastData.cod === 200 || forecastData.cod === "200") {
+            updateFarmerUI(forecastData);
+        } else {
+            showError("Weather API error inside proxy. Check env.php.");
+        }
+    } catch (error) {
+        showError("Error connecting to weather service.");
+        console.error(error);
+    } finally {
+        showLoader(false);
+    }
+}
+
+function updateFarmerUI(forecast) {
+    const listContainer = document.getElementById('farmer-forecast-list');
+    const adviceContainer = document.getElementById('farmer-advice-list');
+    
+    if (!listContainer || !adviceContainer) return;
+    
+    listContainer.innerHTML = '';
+    
+    // Process forecast data to get max probability of precipitation per day
+    const dailyData = {};
+    forecast.list.forEach(item => {
+        const date = new Date(item.dt * 1000).toLocaleDateString('en-US');
+        if (!dailyData[date]) {
+            dailyData[date] = { 
+                pop: 0, 
+                temp: item.main.temp,
+                icon: item.weather[0].icon,
+                description: item.weather[0].description,
+                rain: 0,
+                dt: item.dt
+            };
+        }
+        // Take max POP for the day
+        if (item.pop > dailyData[date].pop) {
+            dailyData[date].pop = item.pop;
+            dailyData[date].icon = item.weather[0].icon;
+            dailyData[date].description = item.weather[0].description;
+        }
+    });
+
+    const days = Object.values(dailyData).slice(0, 5); // 5 days
+    let maxRainChance = 0;
+    let highRainDay = null;
+
+    days.forEach((day, index) => {
+        let label = index === 0 ? "Today" : index === 1 ? "Tomorrow" : `Day ${index + 1}`;
+        let popPercent = Math.round(day.pop * 100);
+        let iconClass = "fa-cloud-sun";
+        let colorStyle = "";
+        
+        if (popPercent > maxRainChance && index > 0) { // skip checking max for today's past hours
+            maxRainChance = popPercent;
+            highRainDay = label;
+        }
+
+        if (popPercent > 50) {
+            iconClass = "fa-cloud-showers-heavy";
+            colorStyle = 'style="border-left: 3px solid var(--alert-info)"';
+        } else if (popPercent > 20) {
+            iconClass = "fa-cloud-rain";
+        } else if (day.icon.includes('01')) {
+            iconClass = "fa-sun";
+        }
+
+        listContainer.innerHTML += `
+            <li class="forecast-item" ${colorStyle}>
+                <span>${label}</span>
+                <span>${popPercent}% chance</span>
+                <span><i class="fa-solid ${iconClass}"></i></span>
+            </li>
+        `;
+    });
+
+    // ----------------------------------------------------
+    // CROP PROFILE LOGIC
+    // ----------------------------------------------------
+    // Get the configured crop from localStorage or generic
+    const activeCrop = localStorage.getItem('farmer_active_crop') || 'generic';
+    
+    // Set up threshold profiles for different crops
+    const cropProfiles = {
+        generic: { minTemp: 15, maxTemp: 25, lowMoisture: 30, okMoisture: 60, name: "Generic crops" },
+        wheat:   { minTemp: 12, maxTemp: 25, lowMoisture: 20, okMoisture: 50, name: "Wheat" },
+        rice:    { minTemp: 20, maxTemp: 35, lowMoisture: 60, okMoisture: 80, name: "Rice" },
+        cotton:  { minTemp: 18, maxTemp: 30, lowMoisture: 35, okMoisture: 55, name: "Cotton" }
+    };
+    
+    const profile = cropProfiles[activeCrop];
+
+    // ----------------------------------------------------
+    // ADVANCED SOIL DATA ALGORITHM (Simulated from Current)
+    // ----------------------------------------------------
+    const currentTemp = days[0].temp;
+    
+    // Soil Temperature is usually slightly lower than ambient air temperature during the day
+    // and slightly higher at night. As a daily average, it closely tracks ambient with a slight lag.
+    let soilTemp = currentTemp - 2.5;
+    if (soilTemp < 0) soilTemp = 0;
+
+    // Soil Moisture generally depletes over time without rain, but spikes with rain
+    // We simulate it based on the recent POP and current humidity
+    let baseMoisture = forecast.list[0].main.humidity * 0.4;
+    let popMoistureBonus = days[0].pop * 40; 
+    let soilMoisture = Math.min(100, Math.max(10, Math.round(baseMoisture + popMoistureBonus)));
+
+    // Evapotranspiration (ET) - approximation of crop water loss
+    // Higher temp + lower humidity = higher water loss
+    let eto = (currentTemp * 0.15) + ((100 - forecast.list[0].main.humidity) * 0.05);
+    if (eto < 0) eto = 0.5;
+    
+    // Unhide the card and inject data
+    const soilCard = document.getElementById('soil-data-card');
+    if (soilCard) soilCard.style.display = 'flex';
+    
+    document.getElementById('farmer-soil-temp').textContent = `${soilTemp.toFixed(1)}°C`;
+    document.getElementById('farmer-soil-moisture').textContent = `${soilMoisture}%`;
+    document.getElementById('farmer-evapo').textContent = `${eto.toFixed(1)} mm/d`;
+
+    // ----------------------------------------------------
+    // SMART ADVICE GENERATOR (Upgraded for Crop Profiles)
+    // ----------------------------------------------------
+    adviceContainer.innerHTML = '';
+    
+    // 1. SOWING ADVISORY
+    if (soilTemp >= profile.minTemp && soilTemp <= profile.maxTemp && days[0].pop < 0.3) {
+        adviceContainer.innerHTML += `
+            <div class="suggestion-box success">
+                <i class="fa-solid fa-seedling"></i>
+                <div>
+                    <strong>Sowing Advisory (${profile.name})</strong> <br>
+                    Soil temperature is optimal (${soilTemp.toFixed(1)}°C). Favorable dry conditions expected for immediately planting ${profile.name.toLowerCase()}.
+                </div>
+            </div>
+        `;
+    } else if (soilTemp < profile.minTemp) {
+        adviceContainer.innerHTML += `
+            <div class="suggestion-box danger">
+                <i class="fa-solid fa-temperature-arrow-down"></i>
+                <div>
+                    <strong>Sowing Alert (${profile.name})</strong> <br>
+                    Soil is too cold for ${profile.name.toLowerCase()} germination (${soilTemp.toFixed(1)}°C). Delay planting until soil warms to at least ${profile.minTemp}°C.
+                </div>
+            </div>
+        `;
+    } else {
+        adviceContainer.innerHTML += `
+            <div class="suggestion-box warning">
+                <i class="fa-solid fa-seedling"></i>
+                <div>
+                    <strong>Sowing Advisory (${profile.name})</strong> <br>
+                    Rain expected or soil temperature (${soilTemp.toFixed(1)}°C) is not ideal for ${profile.name.toLowerCase()}. Monitor conditions closures before sowing.
+                </div>
+            </div>
+        `;
+    }
+
+    // 2. IRRIGATION ADVISORY (Uses dynamic profile moisture limits)
+    if (soilMoisture < profile.lowMoisture && maxRainChance < 30) {
+        adviceContainer.innerHTML += `
+            <div class="suggestion-box danger">
+                <i class="fa-solid fa-droplet-slash"></i>
+                <div>
+                    <strong>Irrigation Alert (${profile.name})</strong> <br>
+                    Critical! Soil moisture is critically low for ${profile.name.toLowerCase()} (${soilMoisture}%) and water loss is ${eto.toFixed(1)} mm/d. <b>Irrigate immediately</b>.
+                </div>
+            </div>
+        `;
+    } else if (soilMoisture >= profile.lowMoisture && soilMoisture < profile.okMoisture && maxRainChance < 50) {
+        adviceContainer.innerHTML += `
+            <div class="suggestion-box warning">
+                <i class="fa-solid fa-faucet-drip"></i>
+                <div>
+                    <strong>Irrigation Advisory (${profile.name})</strong> <br>
+                    Soil moisture is dropping (${soilMoisture}%). Schedule light irrigation for your ${profile.name.toLowerCase()} to compensate for ${eto.toFixed(1)} mm/d evaporation.
+                </div>
+            </div>
+        `;
+    } else if (soilMoisture >= profile.okMoisture) {
+        adviceContainer.innerHTML += `
+            <div class="suggestion-box success">
+                <i class="fa-solid fa-water"></i>
+                <div>
+                    <strong>Irrigation Advisory (${profile.name})</strong> <br>
+                    Soil moisture is excellent for ${profile.name.toLowerCase()} (${soilMoisture}%). No irrigation required at this time.
+                </div>
+            </div>
+        `;
+    }
+
+    // 3. PESTICIDE / HARVEST ADVISORY (Classic)
+    if (maxRainChance > 40) {
+        adviceContainer.innerHTML += `
+            <div class="suggestion-box danger">
+                <i class="fa-solid fa-spray-can-sparkles"></i>
+                <div>
+                    <strong>Pesticide Alert</strong> <br>
+                    ${maxRainChance}% chance of rain on ${highRainDay}. <b>Avoid pesticide/fertilizer spraying</b> before this period to prevent wash-off.
+                </div>
+            </div>
+            <div class="suggestion-box warning">
+                <i class="fa-solid fa-wheat-awn"></i>
+                <div>
+                    <strong>Harvesting Advisory</strong> <br>
+                    Expected rain on ${highRainDay}. Accelerate harvesting or protect harvested crops.
+                </div>
+            </div>
+        `;
+    } else {
+        adviceContainer.innerHTML += `
+            <div class="suggestion-box success">
+                <i class="fa-solid fa-spray-can-sparkles"></i>
+                <div>
+                    <strong>Spraying Advisory</strong> <br>
+                    Low rain chance for the next few days. Ideal conditions for pesticide or fertilizer application.
+                </div>
+            </div>
+        `;
+    }
+}
+
+// ============================================
 // OUTFIT & ACTIVITY SUGGESTION SYSTEM
 // ============================================
 function generateSuggestions(weather) {
@@ -414,7 +692,7 @@ async function fetchAQI(lat, lon) {
     showLoader(true);
     const container = document.getElementById('aqi-content');
     try {
-        const response = await fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${WAQI_API_KEY}`);
+        const response = await fetch(`${API_BASE_URL}proxy.php?service=aqi&lat=${lat}&lon=${lon}`);
         const data = await response.json();
 
         if (data.status === 'ok') {
@@ -436,10 +714,11 @@ async function fetchAQI(lat, lon) {
             `;
             container.style.display = 'block';
         } else {
-            showError("Invalid WAQI Token. Please configure in main.js.");
+            showError("Invalid WAQI Token. Please configure in env.php.");
         }
-    } catch {
-        showError("Failed to fetch Air Quality Data.");
+    } catch (e) {
+        console.error("fetchAQI Error Details:", e);
+        showError("Failed to fetch Air Quality Data. Check console for details.");
     } finally {
         showLoader(false);
     }

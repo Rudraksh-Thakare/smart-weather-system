@@ -30,10 +30,22 @@
         </button>
     </nav>
 
-    <div class="container">
-        <header style="margin-bottom: 2rem;">
-            <h1><i class="fa-solid fa-seedling" style="color:#10b981;"></i> Farmer Assistant</h1>
-            <p style="color: var(--text-secondary);">Localized weather insights tailored for agriculture.</p>
+    <div class="container" id="farmer-content">
+        <header style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1><i class="fa-solid fa-seedling" style="color:#10b981;"></i> Farmer Assistant</h1>
+                <p style="color: var(--text-secondary);">Localized weather insights tailored for agriculture.</p>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; background: var(--card-bg); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--card-border);">
+                <i class="fa-solid fa-wheat-awn" style="color:var(--accent);"></i>
+                <label for="crop-selector" style="font-weight: 600;">Active Crop:</label>
+                <select id="crop-selector" style="background: transparent; border: none; color: var(--text-primary); font-family: inherit; font-size: 1rem; cursor: pointer; outline: none;">
+                    <option value="generic">Mixed / Generic</option>
+                    <option value="wheat">Wheat</option>
+                    <option value="rice">Rice</option>
+                    <option value="cotton">Cotton</option>
+                </select>
+            </div>
         </header>
 
         <div class="dashboard-grid">
@@ -41,48 +53,55 @@
                 <h3>7-Day Rainfall Forecast</h3>
                 <div style="margin-top:1rem;">
                     <p style="color:var(--text-secondary)"><i>Generated using OpenWeather predictive data.</i></p>
-                    <ul class="forecast-list" style="margin-top:1rem;">
-                        <li class="forecast-item"><span>Today</span> <span>0% chance</span> <span><i
-                                    class="fa-solid fa-cloud-sun"></i></span></li>
-                        <li class="forecast-item"><span>Tomorrow</span> <span>15% chance</span> <span><i
-                                    class="fa-solid fa-cloud"></i></span></li>
-                        <li class="forecast-item" style="border-left: 3px solid var(--alert-info)"><span>Day 3</span>
-                            <span>85% chance - Heavy Rain</span> <span><i
-                                    class="fa-solid fa-cloud-showers-heavy"></i></span>
-                        </li>
-                        <li class="forecast-item"><span>Day 4</span> <span>20% chance</span> <span><i
-                                    class="fa-solid fa-cloud-sun"></i></span></li>
-                        <li class="forecast-item"><span>Day 5</span> <span>0% chance</span> <span><i
-                                    class="fa-solid fa-sun"></i></span></li>
+                    <ul class="forecast-list" id="farmer-forecast-list" style="margin-top:1rem;">
+                        <!-- Forecast items will be injected here dynamically -->
+                        <li class="forecast-item"><span>Loading...</span></li>
                     </ul>
                 </div>
             </div>
 
-            <div class="card glass">
-                <h3><i class="fa-solid fa-tractor" style="color:var(--alert-warning)"></i> Smart Farming Advice</h3>
+            <div class="card glass" id="soil-data-card" style="display: none;">
+                <h3><i class="fa-solid fa-layer-group" style="color:var(--accent)"></i> Advanced Soil Data</h3>
                 <div style="margin-top:1rem;">
-                    <div class="suggestion-box success">
-                        <i class="fa-solid fa-seedling"></i>
-                        <div>
-                            <strong>Sowing Advisory</strong> <br>
-                            Soil moisture is adequate for sowing early rabi crops today.
+                    <p style="color:var(--text-secondary); margin-bottom: 1rem;"><i>Calculated local agrometrics.</i></p>
+                    
+                    <div class="weather-details" style="display:flex; flex-direction:column; gap:0.5rem; justify-content: flex-start; padding-top: 0; border: none;">
+                        <div class="detail-item" style="flex-direction: row; justify-content: space-between; padding: 1rem; background: rgba(0,0,0,0.03); border-radius: 8px;">
+                            <div style="display:flex; align-items:center; gap:0.5rem;">
+                                <i class="fa-solid fa-temperature-arrow-down" style="color:var(--alert-danger)"></i>
+                                <span>Soil Temperature</span>
+                            </div>
+                            <span class="detail-value" id="farmer-soil-temp">--°C</span>
+                        </div>
+                        
+                        <div class="detail-item" style="flex-direction: row; justify-content: space-between; padding: 1rem; background: rgba(0,0,0,0.03); border-radius: 8px;">
+                            <div style="display:flex; align-items:center; gap:0.5rem;">
+                                <i class="fa-solid fa-water" style="color:var(--alert-info)"></i>
+                                <span>Soil Moisture</span>
+                            </div>
+                            <span class="detail-value" id="farmer-soil-moisture">--%</span>
+                        </div>
+                        
+                        <div class="detail-item" style="flex-direction: row; justify-content: space-between; padding: 1rem; background: rgba(0,0,0,0.03); border-radius: 8px;">
+                            <div style="display:flex; align-items:center; gap:0.5rem;">
+                                <i class="fa-solid fa-droplet-slash" style="color:var(--alert-warning)"></i>
+                                <span>Evapotranspiration</span>
+                            </div>
+                            <span class="detail-value" id="farmer-evapo">-- mm/d</span>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    <div class="suggestion-box danger">
-                        <i class="fa-solid fa-spray-can-sparkles"></i>
+            <div class="card glass" style="grid-column: 1 / -1;">
+                <h3><i class="fa-solid fa-tractor" style="color:var(--alert-warning)"></i> Smart Farming Advice</h3>
+                <div id="farmer-advice-list" style="margin-top:1rem;">
+                    <!-- Advice items will be injected here dynamically -->
+                    <div class="suggestion-box info">
+                        <i class="fa-solid fa-spinner fa-spin"></i>
                         <div>
-                            <strong>Pesticide Alert</strong> <br>
-                            High chance of rain on Day 3. <b>Avoid pesticide/fertilizer spraying</b> for the next 48
-                            hours to prevent wash-off.
-                        </div>
-                    </div>
-
-                    <div class="suggestion-box warning">
-                        <i class="fa-solid fa-wheat-awn"></i>
-                        <div>
-                            <strong>Harvesting Advisory</strong> <br>
-                            If harvesting, complete work by tomorrow evening before the expected showers.
+                            <strong>Analyzing data...</strong> <br>
+                            Fetching localized weather insights...
                         </div>
                     </div>
                 </div>
