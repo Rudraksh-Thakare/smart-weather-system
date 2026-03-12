@@ -1,6 +1,11 @@
-# Ignore sensitive files from GitHub
 api/env.php
 start_automation.ps1
+
+# Ignore test files
+test_waqi.php
+test_proxy.php
+test_db.php
+test_output.json
 
 # Ignore OS files
 .DS_Store
