@@ -1,3 +1,8 @@
 [variables]
-WAQI_API_KEY = ""
-OPENWEATHER_API_KEY = ""
+WAQI_API_KEY = "placeholder"
+OPENWEATHER_API_KEY = "placeholder"
+DB_HOST = "placeholder"
+DB_NAME = "placeholder"
+DB_USER = "placeholder"
+DB_PASS = "placeholder"
+DB_PORT = "5432"
