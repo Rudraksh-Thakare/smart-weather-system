@@ -1,5 +1,5 @@
 FROM php:8.2-apache
-RUN a2enmod rewrite
+RUN a2dismod mpm_event && a2enmod mpm_prefork rewrite
 COPY . /var/www/html/
 RUN chown -R www-data:www-data /var/www/html
 EXPOSE 80
